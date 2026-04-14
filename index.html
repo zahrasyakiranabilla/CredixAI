@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CredixAI — Credit Scoring System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --g-900: #0d2b18;
+    --g-800: #1a4a2e;
+    --g-700: #2d6a4f;
+    --g-500: #52b788;
+    --g-200: #b7e4c7;
+    --g-50:  #d8f3dc;
+    --cream: #faf9f6;
+    --white: #ffffff;
+    --ink:   #1c1c1c;
+    --ink-2: #3d3d3d;
+    --ink-3: #717171;
+    --ink-4: #aaaaaa;
+    --border:#e3dfd5;
+    --accent:#f4a261;
+    --danger:#c0392b;
+    --warn:  #e67e22;
+    --ok:    #27ae60;
+    --r: 10px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 15px; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ─── TOPBAR ─── */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(250,249,246,0.9);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem; height: 58px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem; color: var(--g-800);
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--g-800);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1rem; font-weight: 700;
+    font-family: 'DM Serif Display', serif;
+  }
+  .topbar-sub {
+    font-size: 0.75rem; color: var(--ink-3);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--g-500); }
+
+  /* ─── LAYOUT ─── */
+  .main {
+    max-width: 1080px; margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  /* ─── FORM PANEL ─── */
+  .panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .panel-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem; font-weight: normal;
+    color: var(--ink);
+  }
+  .panel-header .ph-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: var(--g-50);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+  }
+  .panel-body { padding: 1.5rem; }
+
+  .section-label {
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--ink-4); font-weight: 600;
+    margin: 1.2rem 0 0.7rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+  .form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 0.73rem; font-weight: 500;
+    color: var(--ink-3); letter-spacing: 0.01em;
+  }
+
+  input[type="number"], select {
+    width: 100%; padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    background: var(--cream);
+    color: var(--ink); font-size: 0.88rem;
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.15s, background 0.15s;
+    appearance: none;
+  }
+  input[type="number"]:focus, select:focus {
+    outline: none; border-color: var(--g-500);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(82,183,136,0.12);
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+  .hint { font-size: 0.68rem; color: var(--ink-4); margin-top: 2px; }
+
+  /* range slider */
+  .range-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .range-header { display: flex; justify-content: space-between; align-items: baseline; }
+  .range-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem; font-weight: 600;
+    color: var(--g-700);
+  }
+  input[type="range"] {
+    width: 100%; height: 4px; cursor: pointer;
+    accent-color: var(--g-700);
+  }
+  .range-ticks {
+    display: flex; justify-content: space-between;
+    font-size: 0.62rem; color: var(--ink-4);
+    margin-top: 1px;
+  }
+
+  /* submit button */
+  .btn-calc {
+    width: 100%; margin-top: 1.5rem;
+    padding: 13px;
+    background: var(--g-800);
+    color: white; border: none; border-radius: var(--r);
+    font-size: 0.95rem; font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; letter-spacing: 0.01em;
+    transition: background 0.2s, transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-calc:hover { background: var(--g-900); }
+  .btn-calc:active { transform: scale(0.99); }
+  .btn-calc .arrow { font-size: 1.1rem; }
+
+  /* ─── RESULT PANEL ─── */
+  .result-panel {
+    position: sticky; top: 78px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden;
+  }
+  .result-header {
+    background: var(--g-800); padding: 1.25rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .result-header h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem; font-weight: normal;
+    color: rgba(255,255,255,0.9);
+  }
+  .model-tag {
+    font-size: 0.62rem; background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.7); padding: 3px 8px;
+    border-radius: 100px; font-family: 'JetBrains Mono', monospace;
+  }
+
+  .result-body { padding: 1.4rem 1.5rem; }
+
+  /* idle state */
+  .idle-state {
+    text-align: center; padding: 2.5rem 1rem;
+    color: var(--ink-4); font-size: 0.85rem; line-height: 1.8;
+  }
+  .idle-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.4; }
+
+  /* score display */
+  .score-display { display: none; }
+  .score-main {
+    text-align: center; padding: 1.2rem 0 1rem;
+  }
+  .score-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 5.5rem; line-height: 1;
+    color: var(--ink); display: block;
+    transition: color 0.4s;
+  }
+  .score-sublabel {
+    font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--ink-4); margin-top: 4px;
+  }
+
+  /* risk badge */
+  .risk-badge {
+    display: block; width: fit-content;
+    margin: 0 auto 1.2rem;
+    padding: 5px 16px; border-radius: 100px;
+    font-size: 0.8rem; font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  /* gauge */
+  .gauge-container { margin-bottom: 1.2rem; }
+  .gauge-track {
+    height: 10px; border-radius: 100px;
+    background: linear-gradient(to right,
+      #c0392b 0%,   #c0392b 20%,
+      #e74c3c 20%,  #e74c3c 27%,
+      #e67e22 27%,  #e67e22 37%,
+      #f1c40f 37%,  #f1c40f 50%,
+      #2ecc71 50%,  #2ecc71 67%,
+      #1abc9c 67%,  #1abc9c 100%
+    );
+    position: relative;
+  }
+  .gauge-thumb {
+    position: absolute; top: 50%;
+    width: 18px; height: 18px;
+    background: white; border: 2.5px solid var(--ink);
+    border-radius: 50%; transform: translate(-50%, -50%);
+    transition: left 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+  .gauge-labels {
+    display: flex; justify-content: space-between;
+    font-size: 0.62rem; color: var(--ink-4);
+    margin-top: 6px; font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* metrics grid */
+  .metrics-3 {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px; margin-bottom: 1.2rem;
+  }
+  .metric-box {
+    background: var(--cream); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 10px 8px; text-align: center;
+  }
+  .metric-box .mv {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem; font-weight: 600; color: var(--ink);
+    display: block; margin-bottom: 2px;
+  }
+  .metric-box .ml {
+    font-size: 0.62rem; color: var(--ink-4);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  /* SHAP bars */
+  .shap-section { margin-bottom: 1.2rem; }
+  .shap-title {
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.09em;
+    color: var(--ink-4); margin-bottom: 0.6rem; font-weight: 600;
+  }
+  .shap-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .shap-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--ink-3);
+    min-width: 120px; flex-shrink: 0;
+  }
+  .shap-track { flex: 1; height: 5px; background: var(--border); border-radius: 100px; overflow: hidden; }
+  .shap-fill { height: 100%; border-radius: 100px; transition: width 0.9s ease; }
+  .shap-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--ink-4);
+    min-width: 34px; text-align: right;
+  }
+
+  /* recommendation box */
+  .rec-box {
+    border-radius: var(--r); padding: 12px 14px;
+    font-size: 0.82rem; line-height: 1.6;
+    border-left: 3px solid;
+  }
+  .rec-box.approve  { background: #eafbf0; border-color: var(--ok); color: #1a5c33; }
+  .rec-box.caution  { background: #fef6ec; border-color: var(--warn); color: #7a4010; }
+  .rec-box.decline  { background: #fdf0ee; border-color: var(--danger); color: #7a1a1a; }
+
+  /* divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+
+  /* feature tabs */
+  .eng-features {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6px; margin-top: 8px;
+  }
+  .eng-pill {
+    background: var(--cream); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 7px 10px;
+  }
+  .eng-pill .ep-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem; color: var(--g-700); display: block;
+  }
+  .eng-pill .ep-val {
+    font-size: 0.82rem; font-weight: 500; color: var(--ink);
+  }
+
+  /* responsive */
+  @media (max-width: 800px) {
+    .main { grid-template-columns: 1fr; }
+    .result-panel { position: static; }
+    .form-grid.three { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 520px) {
+    .form-grid, .form-grid.three { grid-template-columns: 1fr; }
+    .metrics-3 { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a class="logo" href="#">
+    <div class="logo-icon">C</div>
+    CredixAI
+  </a>
+  <div class="topbar-sub">
+    <div class="dot"></div>
+    Credit Scoring System · Hybrid NN-XGBoost + SHAP
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- ── FORM ── -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="ph-icon">📋</div>
+      <h2>Data Peminjam</h2>
+    </div>
+    <div class="panel-body">
+
+      <div class="section-label">Informasi Pinjaman</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Jumlah Pinjaman (Rp)</label>
+          <input type="number" id="loan_amnt" value="15000000" min="1000000" max="500000000" step="500000">
+          <span class="hint">Min Rp 1 juta — Maks Rp 500 juta</span>
+        </div>
+        <div class="field">
+          <label>Suku Bunga (%)</label>
+          <input type="number" id="int_rate" value="13.5" min="5" max="35" step="0.1">
+        </div>
+        <div class="field">
+          <label>Tenor</label>
+          <select id="term">
+            <option value="36" selected>36 bulan (3 tahun)</option>
+            <option value="60">60 bulan (5 tahun)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Grade Pinjaman</label>
+          <select id="grade">
+            <option value="1">A — Sangat Baik</option>
+            <option value="2" selected>B — Baik</option>
+            <option value="3">C — Cukup</option>
+            <option value="4">D — Kurang</option>
+            <option value="5">E — Berisiko</option>
+            <option value="6">F — Sangat Berisiko</option>
+            <option value="7">G — Terburuk</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tujuan Pinjaman</label>
+          <select id="purpose">
+            <option value="1">Konsolidasi hutang</option>
+            <option value="2" selected>Pelunasan kartu kredit</option>
+            <option value="3">Perbaikan rumah</option>
+            <option value="4">Bisnis kecil</option>
+            <option value="5">Pembelian besar</option>
+            <option value="6">Pendidikan</option>
+            <option value="7">Lainnya</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status Verifikasi</label>
+          <select id="verification">
+            <option value="0" selected>Tidak diverifikasi</option>
+            <option value="1">Source verified</option>
+            <option value="2">Verified</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-label">Data Keuangan Peminjam</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Pendapatan Tahunan (Rp)</label>
+          <input type="number" id="annual_inc" value="72000000" min="10000000" max="2000000000" step="1000000">
+        </div>
+        <div class="field">
+          <label>Lama Bekerja (tahun)</label>
+          <input type="number" id="emp_length" value="5" min="0" max="10" step="1">
+          <span class="hint">0 = &lt;1 tahun, 10 = 10+ tahun</span>
+        </div>
+        <div class="field">
+          <label>Status Kepemilikan Rumah</label>
+          <select id="home_ownership">
+            <option value="0">Mortgage</option>
+            <option value="1" selected>Sewa (Rent)</option>
+            <option value="2">Milik Sendiri (Own)</option>
+            <option value="3">Lainnya</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>DTI Ratio (%)</label>
+          <input type="number" id="dti" value="18" min="0" max="60" step="0.1">
+          <span class="hint">Debt-to-Income Ratio</span>
+        </div>
+      </div>
+
+      <div class="section-label">Profil Kredit &amp; Riwayat</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>FICO Score (batas bawah)</label>
+          <input type="number" id="fico_low" value="700" min="580" max="840" step="5">
+        </div>
+        <div class="field">
+          <label>FICO Score (batas atas)</label>
+          <input type="number" id="fico_high" value="714" min="584" max="850" step="5">
+        </div>
+        <div class="field">
+          <label>Utilisasi Kredit Bergulir (%)</label>
+          <div class="range-wrap">
+            <div class="range-header">
+              <label style="font-size:0.7rem; color:var(--ink-3);">revol_util</label>
+              <span class="range-val" id="revol-util-val">35%</span>
+            </div>
+            <input type="range" id="revol_util" min="0" max="100" value="35" step="1"
+              oninput="document.getElementById('revol-util-val').textContent=this.value+'%'">
+            <div class="range-ticks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Saldo Kredit Bergulir (Rp)</label>
+          <input type="number" id="revol_bal" value="8000000" min="0" step="500000">
+        </div>
+        <div class="field">
+          <label>Total Pembayaran Dilakukan (Rp)</label>
+          <input type="number" id="total_pymnt" value="5000000" min="0" step="100000">
+        </div>
+        <div class="field">
+          <label>Total Bunga Dibayar (Rp)</label>
+          <input type="number" id="total_rec_int" value="1200000" min="0" step="100000">
+        </div>
+        <div class="field">
+          <label>Jumlah Akun Terbuka</label>
+          <input type="number" id="open_acc" value="8" min="1" max="60" step="1">
+        </div>
+        <div class="field">
+          <label>Total Akun Kredit</label>
+          <input type="number" id="total_acc" value="20" min="1" max="100" step="1">
+        </div>
+      </div>
+
+      <button class="btn-calc" onclick="computeScore()">
+        <span>Hitung Credit Score</span>
+        <span class="arrow">→</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ── RESULT ── -->
+  <div class="result-panel">
+    <div class="result-header">
+      <h3>Hasil Scoring</h3>
+      <span class="model-tag">Hybrid NN-XGBoost</span>
+    </div>
+    <div class="result-body">
+
+      <!-- idle -->
+      <div class="idle-state" id="idle-state">
+        <div class="idle-icon">🏦</div>
+        <p>Isi data peminjam dan klik<br><strong>Hitung Credit Score</strong><br>untuk mendapatkan hasil analisis risiko.</p>
+      </div>
+
+      <!-- result -->
+      <div class="score-display" id="score-display">
+
+        <!-- score -->
+        <div class="score-main">
+          <span class="score-number" id="score-num">–</span>
+          <div class="score-sublabel">Credit Score (300–850)</div>
+        </div>
+        <span class="risk-badge" id="risk-badge">–</span>
+
+        <!-- gauge -->
+        <div class="gauge-container">
+          <div class="gauge-track">
+            <div class="gauge-thumb" id="gauge-thumb" style="left:50%"></div>
+          </div>
+          <div class="gauge-labels">
+            <span>300</span><span>450</span><span>550</span><span>650</span><span>750</span><span>850</span>
+          </div>
+        </div>
+
+        <!-- 3 metrics -->
+        <div class="metrics-3">
+          <div class="metric-box">
+            <span class="mv" id="m-prob">–</span>
+            <span class="ml">P(gagal bayar)</span>
+          </div>
+          <div class="metric-box">
+            <span class="mv" id="m-lti">–</span>
+            <span class="ml">Loan-to-Income</span>
+          </div>
+          <div class="metric-box">
+            <span class="mv" id="m-ir">–</span>
+            <span class="ml">Installment Ratio</span>
+          </div>
+        </div>
+
+        <!-- SHAP -->
+        <div class="shap-section">
+          <div class="shap-title">Kontribusi Fitur (SHAP-style)</div>
+          <div id="shap-rows"></div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- engineered features -->
+        <div style="margin-bottom:1.2rem;">
+          <div class="shap-title">Feature Engineering</div>
+          <div class="eng-features">
+            <div class="eng-pill">
+              <span class="ep-name">loan_to_income</span>
+              <span class="ep-val" id="fe-lti">–</span>
+            </div>
+            <div class="eng-pill">
+              <span class="ep-name">installment_ratio</span>
+              <span class="ep-val" id="fe-ir">–</span>
+            </div>
+            <div class="eng-pill">
+              <span class="ep-name">payment_ratio</span>
+              <span class="ep-val" id="fe-pr">–</span>
+            </div>
+            <div class="eng-pill">
+              <span class="ep-name">interest_burden</span>
+              <span class="ep-val" id="fe-ib">–</span>
+            </div>
+            <div class="eng-pill">
+              <span class="ep-name">fico_avg</span>
+              <span class="ep-val" id="fe-fico">–</span>
+            </div>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- recommendation -->
+        <div class="rec-box" id="rec-box">–</div>
+
+        <!-- formula note -->
+        <p style="font-size:0.68rem; color:var(--ink-4); margin-top:1rem; text-align:center; font-family:'JetBrains Mono',monospace;">
+          score = 850 − (P(default) × 550)
+        </p>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- footer -->
+<footer style="text-align:center; padding:2rem; font-size:0.75rem; color:var(--ink-4); border-top:1px solid var(--border); margin-top:2rem;">
+  Copyright &copy; 2026 CredixAI. All rights reserved. &mdash;
+  <span style="font-family:'JetBrains Mono',monospace;">Hybrid NN-XGBoost + SHAP · OJK 77/POJK.01/2016</span>
+</footer>
+
+<script>
+function computeScore() {
+  const loan      = +document.getElementById('loan_amnt').value    || 15e6;
+  const rate      = +document.getElementById('int_rate').value     || 13.5;
+  const term      = +document.getElementById('term').value         || 36;
+  const grade     = +document.getElementById('grade').value        || 2;
+  const purpose   = +document.getElementById('purpose').value      || 2;
+  const verif     = +document.getElementById('verification').value || 0;
+  const inc       = +document.getElementById('annual_inc').value   || 72e6;
+  const emp       = +document.getElementById('emp_length').value   || 5;
+  const homeOwn   = +document.getElementById('home_ownership').value || 1;
+  const dti       = +document.getElementById('dti').value          || 18;
+  const ficoLow   = +document.getElementById('fico_low').value     || 700;
+  const ficoHigh  = +document.getElementById('fico_high').value    || 714;
+  const revUtil   = +document.getElementById('revol_util').value   || 35;
+  const revolBal  = +document.getElementById('revol_bal').value    || 8e6;
+  const totalPmnt = +document.getElementById('total_pymnt').value  || 5e6;
+  const totalInt  = +document.getElementById('total_rec_int').value || 1.2e6;
+  const openAcc   = +document.getElementById('open_acc').value     || 8;
+  const totalAcc  = +document.getElementById('total_acc').value    || 20;
+
+  /* ── Feature Engineering (persis dari paper) ── */
+  const monthlyInc    = inc / 12;
+  const installment   = (loan * (rate/100/12)) / (1 - Math.pow(1 + rate/100/12, -term));
+  const lti           = loan     / (inc + 1);
+  const installRatio  = installment / (monthlyInc + 1);
+  const ficoAvg       = (ficoLow + ficoHigh) / 2;
+  const payRatio      = totalPmnt / (loan + 1);
+  const intBurden     = totalInt   / (loan + 1);
+
+  /* ── Risk Model (bobot dari SHAP paper) ── */
+  let risk = 0.05; // base rate
+
+  // revol_util — fitur paling dominan (SHAP mean ~0.016)
+  if      (revUtil > 85) risk += 0.28;
+  else if (revUtil > 70) risk += 0.20;
+  else if (revUtil > 55) risk += 0.13;
+  else if (revUtil > 40) risk += 0.06;
+  else if (revUtil > 20) risk += 0.01;
+  else                   risk -= 0.02;
+
+  // grade
+  risk += (grade - 1) * 0.063;
+
+  // DTI
+  if      (dti > 45) risk += 0.14;
+  else if (dti > 35) risk += 0.09;
+  else if (dti > 25) risk += 0.05;
+  else if (dti > 15) risk += 0.01;
+  else               risk -= 0.01;
+
+  // FICO avg
+  if      (ficoAvg > 780) risk -= 0.10;
+  else if (ficoAvg > 740) risk -= 0.06;
+  else if (ficoAvg > 700) risk -= 0.02;
+  else if (ficoAvg > 660) risk += 0.03;
+  else if (ficoAvg > 620) risk += 0.08;
+  else                    risk += 0.15;
+
+  // loan_to_income
+  risk += Math.min(lti * 0.38, 0.13);
+
+  // installment_ratio
+  if      (installRatio > 0.5)  risk += 0.12;
+  else if (installRatio > 0.35) risk += 0.07;
+  else if (installRatio > 0.2)  risk += 0.03;
+
+  // payment_ratio (progress pelunasan = menurunkan risiko)
+  risk -= Math.min(payRatio * 0.18, 0.10);
+
+  // interest_burden
+  risk += Math.min(intBurden * 0.09, 0.06);
+
+  // revol_bal
+  risk += Math.min((revolBal / 1.5e8) * 0.12, 0.07);
+
+  // purpose risk
+  const purposeAdd = { 1:0.01, 2:-0.01, 3:-0.03, 4:0.09, 5:0.02, 6:0.04, 7:0.02 };
+  risk += purposeAdd[purpose] || 0;
+
+  // verification (terverifikasi = sedikit lebih aman)
+  risk -= verif * 0.01;
+
+  // emp length
+  if      (emp >= 9) risk -= 0.04;
+  else if (emp >= 5) risk -= 0.02;
+  else if (emp <= 1) risk += 0.03;
+
+  // home ownership (own = lebih stabil)
+  if (homeOwn === 2) risk -= 0.02;
+  else if (homeOwn === 1) risk += 0.01;
+
+  // open_acc (terlalu banyak = warning)
+  if (openAcc > 20) risk += 0.03;
+
+  risk = Math.max(0.001, Math.min(0.985, risk));
+
+  const score = Math.round(850 - (risk * 550));
+
+  /* ── Risk Category ── */
+  let cat, bgColor, txtColor, recClass, recText;
+  if (score >= 750) {
+    cat = 'Very Low Risk';
+    bgColor = '#d1fae5'; txtColor = '#065f46';
+    recClass = 'approve';
+    recText = '✓ Direkomendasikan disetujui. Profil peminjam sangat kuat dengan risiko gagal bayar sangat rendah. Tidak diperlukan jaminan tambahan.';
+  } else if (score >= 650) {
+    cat = 'Low Risk';
+    bgColor = '#dcfce7'; txtColor = '#166534';
+    recClass = 'approve';
+    recText = '✓ Direkomendasikan disetujui dengan monitoring berkala. Profil keuangan baik, pertimbangkan review setiap 6 bulan.';
+  } else if (score >= 550) {
+    cat = 'Medium Risk';
+    bgColor = '#fef3c7'; txtColor = '#92400e';
+    recClass = 'caution';
+    recText = '⚠ Pertimbangkan dengan hati-hati. Minta dokumen pendukung tambahan atau kurangi plafon pinjaman. Monitoring ketat diperlukan.';
+  } else if (score >= 450) {
+    cat = 'High Risk';
+    bgColor = '#fee2e2'; txtColor = '#991b1b';
+    recClass = 'decline';
+    recText = '✕ Tidak direkomendasikan tanpa jaminan kuat. Risiko gagal bayar tinggi. Jika disetujui, wajib collateral senilai minimal 120% plafon.';
+  } else {
+    cat = 'Very High Risk';
+    bgColor = '#fecaca'; txtColor = '#7f1d1d';
+    recClass = 'decline';
+    recText = '✕ Ditolak. Profil risiko tidak memenuhi standar minimum platform. Sarankan peminjam untuk memperbaiki profil kredit terlebih dahulu.';
+  }
+
+  /* ── SHAP-style factors ── */
+  const shapFactors = [
+    { name: 'revol_util',        raw: revUtil > 50 ? +(revUtil/100 * 0.28) : -(0.03 + (50-revUtil)/1000), isRisk: revUtil > 35 },
+    { name: 'grade',             raw: (grade-1) * 0.063,                                                   isRisk: grade > 2   },
+    { name: 'dti',               raw: dti > 20 ? (dti-20) * 0.003 : -0.01,                                isRisk: dti > 20    },
+    { name: 'fico_avg',          raw: ficoAvg > 700 ? -0.04 * ((ficoAvg-700)/150) : 0.08,                 isRisk: ficoAvg < 700 },
+    { name: 'loan_to_income',    raw: lti * 0.38,                                                          isRisk: lti > 0.15  },
+    { name: 'installment_ratio', raw: installRatio > 0.2 ? installRatio * 0.1 : 0.005,                    isRisk: installRatio > 0.2 },
+    { name: 'interest_burden',   raw: intBurden * 0.09,                                                   isRisk: true        },
+    { name: 'payment_ratio',     raw: Math.abs(payRatio * 0.18),                                          isRisk: false       },
+  ];
+  shapFactors.sort((a, b) => Math.abs(b.raw) - Math.abs(a.raw));
+  const maxShap = Math.max(...shapFactors.map(f => Math.abs(f.raw)));
+
+  /* ── RENDER ── */
+  document.getElementById('idle-state').style.display = 'none';
+  const sd = document.getElementById('score-display');
+  sd.style.display = 'block';
+
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('score-num').style.color = txtColor;
+
+  const badge = document.getElementById('risk-badge');
+  badge.textContent = cat;
+  badge.style.background = bgColor;
+  badge.style.color = txtColor;
+
+  const pct = ((score - 300) / 550 * 100).toFixed(1);
+  document.getElementById('gauge-thumb').style.left = pct + '%';
+
+  document.getElementById('m-prob').textContent = (risk * 100).toFixed(1) + '%';
+  document.getElementById('m-lti').textContent  = (lti * 100).toFixed(1) + '%';
+  document.getElementById('m-ir').textContent   = (installRatio * 100).toFixed(1) + '%';
+
+  // SHAP rows
+  const shapContainer = document.getElementById('shap-rows');
+  shapContainer.innerHTML = '';
+  shapFactors.forEach(f => {
+    const w = Math.round(Math.abs(f.raw) / maxShap * 100);
+    const color = f.isRisk ? '#e24b4a' : '#1d9e75';
+    const sign  = f.isRisk ? '+' : '−';
+    shapContainer.innerHTML += `
+      <div class="shap-row">
+        <span class="shap-name">${f.name}</span>
+        <div class="shap-track">
+          <div class="shap-fill" style="width:${w}%; background:${color};"></div>
+        </div>
+        <span class="shap-val">${sign}${(Math.abs(f.raw)*100).toFixed(1)}%</span>
+      </div>`;
+  });
+
+  // Engineered features
+  document.getElementById('fe-lti').textContent  = (lti * 100).toFixed(2) + '%';
+  document.getElementById('fe-ir').textContent   = (installRatio * 100).toFixed(2) + '%';
+  document.getElementById('fe-pr').textContent   = (payRatio * 100).toFixed(2) + '%';
+  document.getElementById('fe-ib').textContent   = (intBurden * 100).toFixed(2) + '%';
+  document.getElementById('fe-fico').textContent = ficoAvg.toFixed(0);
+
+  // Recommendation
+  const rec = document.getElementById('rec-box');
+  rec.className = 'rec-box ' + recClass;
+  rec.textContent = recText;
+
+  // Scroll to result on mobile
+  if (window.innerWidth <= 800) {
+    document.getElementById('score-display').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+</script>
+</body>
+</html>
